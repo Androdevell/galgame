@@ -6,7 +6,7 @@
   <title>{% block title %}Cute Shop{% endblock %}</title>
   <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet">
   <style>
-          /* 下拉菜单样式 */
+     /* 下拉菜单样式 */
     .dropdown {
       position: relative;
       display: inline-block;
@@ -37,6 +37,7 @@
     .dropdown:hover .dropdown-content {
       display: block;
     }
+
 
     body {
       font-family: 'Nunito', sans-serif;
@@ -79,7 +80,7 @@
       left: 0;
       top: 0;
       width: 100%;
-      height: 90%;
+      height: 100%;
       overflow: auto;
       background-color: rgba(0, 0, 0, 0.5);
     }
@@ -88,7 +89,7 @@
       margin: 15% auto;
       padding: 20px;
       border: 1px solid #888;
-      width: 250px;
+      width: 300px;
       border-radius: 10px;
       text-align: center;
       position: relative;
@@ -124,21 +125,25 @@
 </head>
 <body>
   <header>
-    <h1>Welcome to Our Yuzu Shop!</h1>
-    <div class="account-area">
-      {% if user.is_authenticated %}
-        <div class="dropdown">
-          <span class="account-name">Hi, {{ user.username }}</span>
-          <div class="dropdown-content">
+      <h1>Welcome to Our Cute Shop!</h1>
+      <div class="account-area">
+        {% if user.is_authenticated %}
+          <div class="dropdown">
+            <span class="account-name">Hi, {{ user.username }}</span>
+            <div class="dropdown-content">
+              <!-- 修改后的登出链接（通过 JS 提交 POST 表单） -->
               <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">登出</a>
+            </div>
           </div>
-        </div>
-      {% else %}
-        <button id="show-login">登录</button>
-      {% endif %}
-    </div>
+          <!-- 隐藏的表单 -->
+          <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+            {% csrf_token %}
+          </form>
+        {% else %}
+          <button id="show-login">登录</button>
+        {% endif %}
+      </div>
   </header>
-
   <!-- 主体内容 -->
   <div class="container">
     {% block content %}
@@ -146,10 +151,9 @@
     {% endblock %}
   </div>
 
-    <footer style="text-align: center;">
-      &copy; {% now "Y" %} Cute Shop. All rights reserved.
-    </footer>
-
+  <footer>
+    &copy; {% now "Y" %} Cute Shop. All rights reserved.
+  </footer>
 
   {% if not user.is_authenticated %}
   <!-- 登录模态窗口 -->
