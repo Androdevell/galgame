@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-z9+7mm(#46e_%psn%8zw3*4__i*%@wm0cpatsqo$5o2lg4nup-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['galgame.space', 'www.galgame.space']
 
 
 # Application definition
