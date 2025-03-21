@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>用户登录</title>
+</head>
+<body>
+    <h2>登录</h2>
+    <form id="login-form">
+        <label>用户名：</label>
+        <input type="text" name="username" required>
+        <br>
+        <label>密码：</label>
+        <input type="password" name="password" required>
+        <br>
+        <button type="submit">登录</button>
+    </form>
+    <p>还没有账户？<a href="/register/">注册</a></p>
+
+    <script>
+        document.getElementById("login-form").onsubmit = function(event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+            fetch("/login/", {
+                method: "POST",
+                body: formData
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    alert("登录成功！");
+                    location.reload();
+                } else {
+                    alert(data.error);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

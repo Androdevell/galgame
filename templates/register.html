@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册</title>
+</head>
+<body>
+    <h2>注册</h2>
+    <form id="register-form">
+        <label>用户名：</label>
+        <input type="text" name="username" required>
+        <br>
+        <label>密码：</label>
+        <input type="password" name="password" required>
+        <br>
+        <button type="submit">注册</button>
+    </form>
+    <p>已有账户？<a href="/login/">登录</a></p>
+
+    <script>
+        document.getElementById("register-form").onsubmit = function(event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+            fetch("/register/", {
+                method: "POST",
+                body: formData
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    alert("注册成功，请登录！");
+                    window.location.href = "/login/";
+                } else {
+                    alert(data.error);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

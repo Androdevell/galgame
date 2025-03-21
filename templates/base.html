@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Cute Shop{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet">
+  <style>
+          /* 下拉菜单样式 */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      background-color: #fff;
+      min-width: 120px;
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+      z-index: 1;
+      border-radius: 4px;
+    }
+
+    .dropdown-content a {
+      color: #333;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
+
+    .dropdown-content a:hover {
+      background-color: #f1f1f1;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fce4ec;
+      color: #333;
+    }
+    header {
+      background-color: #ff80ab;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      border-bottom: 4px solid #f48fb1;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5em;
+    }
+    /* 右上角区域 */
+    .account-area {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+    .account-area button,
+    .account-area span {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    /* Modal 样式 */
+    .modal {
+      display: none; /* 默认隐藏 */
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 90%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 250px;
+      border-radius: 10px;
+      text-align: center;
+      position: relative;
+    }
+    .close {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      font-size: 1.2em;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .modal-content input {
+      width: 90%;
+      padding: 8px;
+      margin: 8px 0;
+    }
+    .modal-content button {
+      padding: 8px 16px;
+      background-color: #ff4081;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .modal-content a {
+      color: #ff4081;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <header>
+    <h1>Welcome to Our Yuzu Shop!</h1>
+    <div class="account-area">
+      {% if user.is_authenticated %}
+        <div class="dropdown">
+          <span class="account-name">Hi, {{ user.username }}</span>
+          <div class="dropdown-content">
+              <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">登出</a>
+          </div>
+        </div>
+      {% else %}
+        <button id="show-login">登录</button>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- 主体内容 -->
+  <div class="container">
+    {% block content %}
+    <!-- 子模板内容将在此填充 -->
+    {% endblock %}
+  </div>
+
+    <footer style="text-align: center;">
+      &copy; {% now "Y" %} Cute Shop. All rights reserved.
+    </footer>
+
+
+  {% if not user.is_authenticated %}
+  <!-- 登录模态窗口 -->
+  <div id="login-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="close-login">&times;</span>
+      <h2>请登录</h2>
+      <form id="modal-login-form">
+        <input type="text" name="username" placeholder="用户名" required>
+        <input type="password" name="password" placeholder="密码" required>
+        <button type="submit">登录</button>
+      </form>
+      <p>还没有账户？ <a id="to-register">注册</a></p>
+    </div>
+  </div>
+  <!-- 注册模态窗口 -->
+  <div id="register-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="close-register">&times;</span>
+      <h2>注册</h2>
+      <form id="modal-register-form">
+        <input type="text" name="username" placeholder="用户名" required>
+        <input type="password" name="password" placeholder="密码" required>
+        <button type="submit">注册</button>
+      </form>
+      <p>已有账户？ <a id="to-login">登录</a></p>
+    </div>
+  </div>
+  {% endif %}
+
+  {% block extra_script %}
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // 如果未登录，自动显示登录窗口
+      {% if not user.is_authenticated %}
+      var loginModal = document.getElementById("login-modal");
+      var registerModal = document.getElementById("register-modal");
+      loginModal.style.display = "block";
+
+      // 切换到注册窗口
+      document.getElementById("to-register").addEventListener("click", function() {
+        loginModal.style.display = "none";
+        registerModal.style.display = "block";
+      });
+      // 切换到登录窗口
+      document.getElementById("to-login").addEventListener("click", function() {
+        registerModal.style.display = "none";
+        loginModal.style.display = "block";
+      });
+
+      // 登录按钮（右上角）触发登录窗口
+      var showLoginBtn = document.getElementById("show-login");
+      if (showLoginBtn) {
+        showLoginBtn.addEventListener("click", function() {
+          loginModal.style.display = "block";
+          registerModal.style.display = "none";
+        });
+      }
+      // 关闭按钮逻辑
+      document.getElementById("close-login").addEventListener("click", function() {
+        loginModal.style.display = "none";
+      });
+      document.getElementById("close-register").addEventListener("click", function() {
+        registerModal.style.display = "none";
+      });
+
+      // 登录表单提交
+      document.getElementById("modal-login-form").addEventListener("submit", function(event) {
+        event.preventDefault();
+        var formData = new FormData(this);
+        fetch("/login/", {
+          method: "POST",
+          body: formData,
+          credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert("登录成功！");
+            location.reload();
+          } else {
+            alert(data.error || "登录失败，请检查用户名或密码");
+          }
+        })
+        .catch(error => {
+          console.error("登录请求错误：", error);
+          alert("登录请求出错");
+        });
+      });
+
+      // 注册表单提交
+      document.getElementById("modal-register-form").addEventListener("submit", function(event) {
+        event.preventDefault();
+        var formData = new FormData(this);
+        fetch("/register/", {
+          method: "POST",
+          body: formData,
+          credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert("注册成功，请登录！");
+            // 切换到登录窗口
+            registerModal.style.display = "none";
+            loginModal.style.display = "block";
+          } else {
+            alert(data.error || "注册失败");
+          }
+        })
+        .catch(error => {
+          console.error("注册请求错误：", error);
+          alert("注册请求出错");
+        });
+      });
+      {% endif %}
+    });
+  </script>
+  {% endblock %}
+</body>
+</html>
