@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cute Shop</title>
+  <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fce4ec; /* 柔和的粉色背景 */
+      color: #333;
+    }
+    header {
+      background-color: #ff80ab; /* 明亮的粉色 */
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 4px solid #f48fb1;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5em;
+    }
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 30px auto;
+    }
+    .product-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .product {
+      background-color: #fff;
+      margin: 15px;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      transition: transform 0.3s;
+      width: 280px;
+    }
+    .product:hover {
+      transform: scale(1.05);
+    }
+    .product img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    .product h3 {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+      color: #ff4081;
+    }
+    .product p {
+      font-size: 0.9em;
+      margin-bottom: 10px;
+    }
+    .price {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #e91e63;
+    }
+    footer {
+      text-align: center;
+      padding: 15px 0;
+      background-color: #ff80ab;
+      color: #fff;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Welcome to Our Cute Shop!</h1>
+  </header>
+  <div class="container">
+    <div class="product-list">
+      {% for product in products %}
+      <div class="product">
+        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.description }}</p>
+        <p class="price">${{ product.price }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <footer>
+    &copy; {% now "Y" %} Cute Shop. All rights reserved.
+  </footer>
+</body>
+</html>
