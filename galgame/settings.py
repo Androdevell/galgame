@@ -25,17 +25,19 @@ SECRET_KEY = 'django-insecure-z9+7mm(#46e_%psn%8zw3*4__i*%@wm0cpatsqo$5o2lg4nup-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['galgame.space', 'www.galgame.space']
+ALLOWED_HOSTS = ['galgame.space', 'www.galgame.space','127.0.0.1']
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'home',
 ]
 
 MIDDLEWARE = [
