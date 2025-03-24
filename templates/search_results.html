@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}搜索"{{ query }}" - Cute Shop{% endblock %}
+
+{% block extra_head %}
+<style>
+    :root {
+        --search-bg: #fff5f9;
+        --highlight-pink: #ff80ab;
+        --price-color: #e91e63;
+    }
+
+    /* 搜索标题 */
+    .search-header {
+        background: linear-gradient(135deg, #fff5f9, #ffe6ee);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .search-title {
+        color: var(--highlight-pink);
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    /* 商品卡片 */
+    .search-card {
+        background: var(--search-bg);
+        border-radius: 1.2rem;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .search-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 20px rgba(255, 128, 171, 0.2);
+    }
+
+    .card-media {
+        height: 220px;
+        background: #fff;
+        padding: 1.5rem;
+        position: relative;
+    }
+
+    .card-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+    }
+
+    .card-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--highlight-pink);
+        color: white;
+        padding: 0.3rem 1rem;
+        border-radius: 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    /* 无结果提示 */
+    .no-results {
+        background: #fff;
+        border-radius: 1.5rem;
+        padding: 3rem;
+        text-align: center;
+    }
+
+    .no-results-icon {
+        font-size: 4rem;
+        color: var(--highlight-pink);
+        margin-bottom: 1.5rem;
+    }
+
+    /* 搜索建议 */
+    .search-suggest {
+        background: rgba(255, 128, 171, 0.1);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+
+    .suggest-item {
+        display: flex;
+        align-items: center;
+        padding: 0.8rem;
+        margin: 0.5rem 0;
+        background: white;
+        border-radius: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .suggest-item:hover {
+        transform: translateX(10px);
+        box-shadow: 0 2px 8px rgba(255, 128, 171, 0.2);
+    }
+
+    /* 价格样式 */
+    .price-box {
+        display: flex;
+        align-items: baseline;
+        gap: 0.8rem;
+    }
+
+    .current-price {
+        color: var(--price-color);
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+
+    /* 操作按钮 */
+    .detail-btn {
+        background: linear-gradient(135deg, var(--highlight-pink), #ff4081);
+        border: none;
+        border-radius: 0.8rem;
+        padding: 0.6rem 1.2rem;
+        color: white !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        transition: all 0.3s ease;
+    }
+
+    .detail-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(255, 128, 171, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="container py-5">
+    <section class="search-header">
+        <h1 class="search-title">
+            <i class="fas fa-search me-3"></i>“{{ query }}”的搜索结果
+        </h1>
+        
+        {% if products %}
+        <div class="d-flex align-items-center text-pink">
+            <i class="fas fa-gift me-2"></i>
+            <span>找到 {{ products|length }} 件可爱商品</span>
+        </div>
+        {% endif %}
+    </section>
+
+    {% if products %}
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for product in products %}
+        <div class="col">
+            <article class="search-card h-100">
+                <div class="card-media">
+                    {% if product.is_holiday_discount_active %}
+                    <span class="card-badge">
+                        <i class="fas fa-tag me-1"></i>特惠中
+                    </span>
+                    {% endif %}
+                    
+                    {% if product.image_url %}
+                    <img src="{{ product.image_url }}" 
+                         alt="{{ product.name }}"
+                         loading="lazy"
+                         class="img-fluid">
+                    {% else %}
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="p-3">
+                    <h5 class="mb-2">{{ product.name }}</h5>
+                    
+                    <div class="price-box mb-3">
+                        {% if product.is_holiday_discount_active %}
+                        <span class="current-price">¥{{ product.holiday_discount_price }}</span>
+                        <small class="text-muted"><del>¥{{ product.price }}</del></small>
+                        {% else %}
+                        <span class="current-price">¥{{ product.price }}</span>
+                        {% endif %}
+                    </div>
+
+                    <a href="{% url 'product_detail' product.id %}" 
+                       class="detail-btn">
+                        <i class="fas fa-heart"></i>
+                        立即查看
+                    </a>
+                </div>
+            </article>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <section class="no-results">
+        <i class="fas fa-sad-tear no-results-icon"></i>
+        <h3 class="mb-4">没有找到关于"{{ query }}"的商品</h3>
+        
+        <div class="search-suggest">
+            <h5 class="mb-3">试试这些建议吧 <i class="fas fa-lightbulb text-warning"></i></h5>
+            <div class="suggest-item">
+                <i class="fas fa-magic me-3 text-pink"></i>
+                检查关键词拼写
+            </div>
+            <div class="suggest-item">
+                <i class="fas fa-filter me-3 text-pink"></i>
+                使用更简洁的词语
+            </div>
+            <div class="suggest-item">
+                <i class="fas fa-star me-3 text-pink"></i>
+                浏览我们的推荐商品
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <div class="mt-5 text-center">
+        <a href="{% url 'index' %}" class="detail-btn btn-lg">
+            <i class="fas fa-home me-2"></i>
+            返回可爱小屋
+        </a>
+    </div>
+</main>
+{% endblock %}
