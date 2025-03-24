@@ -6,12 +6,12 @@
 <style>
   .product-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
-    grid-gap: 40px;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-gap: 10px;
   }
   .product {
     background-color: #fff;
-    margin: 40px;
+    margin: 35px;
     padding: 25px;
     border-radius: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -24,7 +24,7 @@
   }
   .product img {
     width: 100%;
-    border-radius: 10px;
+    border-radius: 17px;
     margin-bottom: 16px;
   }
   .product h3 {
@@ -33,22 +33,29 @@
     color: #ff4081;
   }
   .product p {
-    font-size: 0.9em;
+    font-size: 1.0em;
     margin-bottom: 10px;
   }
-  .price {
+  .product price {
     font-size: 1.2em;
     font-weight: bold;
+    margin-bottom: 10px;
+    color: #e91e63;
+  }
+  .product discount-price {
+    font-size: 1.4em;
+    font-weight: bold;
+    margin-bottom: 10px;
     color: #e91e63;
   }
   .detail-button {
-    display: inline-block;
-    margin-top: 10px;
+    display: block;
+    margin-top: 20px;
     padding: 10px 15px;
     background-color: #ff4081;
     color: #fff;
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: 17px;
     transition: background-color 0.3s;
   }
   .detail-button:hover {
@@ -65,11 +72,12 @@
     <h3>{{ product.name }}</h3>
     <p>{{ product.description }}</p>
     {% if product.is_holiday_discount_active and product.holiday_discount_price %}
-    <p>原价：<del>{{ product.price }}</del></p>
-    <p>折扣价：<strong>{{ product.holiday_discount_price }}</strong></p>
+    <price>原价：<del>{{ product.price }}￥</del></price>
+    <discount-price>折扣价：<strong>{{ product.holiday_discount_price }}￥</strong></discount-price>
     {% else %}
-        <p>价格：{{ product.price }}</p>
+        <price>价格：{{ product.price }}￥</price>
     {% endif %}
+
     <a href="{% url 'product_detail' product.id %}" class="detail-button">查看详情</a>
   </div>
   {% endfor %}

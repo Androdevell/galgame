@@ -27,10 +27,24 @@
     .product-detail h1 {
       color: #ff4081;
     }
-    .price {
+    .product-detail price {
       font-size: 1.2em;
       font-weight: bold;
+      margin-bottom: 10px;
       color: #e91e63;
+    }
+    .detail-button
+    {
+      display: block;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      padding: 10px 15px;
+      background-color: #ff4081;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 17px;
+      width: 8%;
+      transition: background-color 0.3s;
     }
   </style>
 </head>
@@ -40,11 +54,13 @@
     <h1>{{ product.name }}</h1>
     <p>{{ product.description }}</p>
     {% if product.is_holiday_discount_active and product.holiday_discount_price %}
-    <p>原价：<del>{{ product.price }}</del></p>
-    <p>折扣价：<strong>{{ product.holiday_discount_price }}</strong></p>
+    <price>原价：<del>{{ product.price }}</del></price>
+    <price>折扣价：<strong>{{ product.holiday_discount_price }}</strong></price>
     {% else %}
-        <p>价格：{{ product.price }}</p>
+        <price>价格：{{ product.price }}</price>
     {% endif %}
+    <a href="{% url 'product_detail' product.id %}" class="detail-button">购买</a>
+
     <a href="{% url 'index' %}">返回主页</a>
   </div>
 </body>
