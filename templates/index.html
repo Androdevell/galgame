@@ -5,7 +5,7 @@
 {% block extra_head %}
 <style>
     :root {
-        --product-card-bg: #ffffff;
+        --product-card-bg: #fff1f6;
         --price-color: #e91e63;
         --highlight-pink: #ff4081;
     }
@@ -27,34 +27,29 @@
         position: relative;
         overflow: hidden;
         border: 2px solid #ffe5f0;
-        color: lightpink;
     }
 
     .product-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 20px rgba(255, 64, 129, 0.15);
-        color: red;
     }
+
     /* 图片容器 */
     .product-media {
         position: relative;
-        border-radius: 5rem;
+        border-radius: 1rem;
         overflow: hidden;
-        aspect-ratio: 1/1;
-        background: #fff;
-        width: 340px;
-        height: 250px;
-        color: #000000;S
+        aspect-ratio: 1.7/1;
+        background: #fff1f6;
     }
 
     .product-media img {
         width: 100%;
         height: 100%;
-        display: block;
         object-fit: contain;
         padding: 1rem;
+        border-radius: 2rem;
         transition: transform 0.3s ease;
-        border-radius: 1.2rem;
     }
 
     .product-card:hover .product-media img {
@@ -152,14 +147,14 @@
 {% block content %}
 <main class="container py-5">
     <h2 class="text-center mb-5 display-5 fw-bold" style="color: var(--highlight-pink);">
-        时尚单品，限时抢购 Ciallo～(∠・ω<)⌒★
+        😊 时尚单品，限时抢购 Ciallo
     </h2>
 
     <div class="product-grid">
         {% for product in products %}
         <article class="product-card">
             {% if product.is_holiday_discount_active and product.holiday_discount_price %}
-                <span class="discount-badge">限时{{ product.discount_percent|default:"20" }}%折扣!</span>
+                <span class="discount-badge">限时{{ product.get_discount_percent }}%折扣!</span>
             {% endif %}
 
             <div class="product-media">

@@ -15,7 +15,7 @@
         :root {
             --primary-pink: #ff80ab;
             --secondary-pink: #f48fb1;
-            --background-pink: #ffffff;
+            --background-pink: #fffefe;
         }
 
         body {
@@ -86,8 +86,9 @@
         <div class="container-fluid">
             <!-- 品牌和响应式菜单按钮 -->
             <a class="navbar-brand text-white brand-title" href="#">
-                🎀 Cute Shop
+                🎀 Yuzo Shop
             </a>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -98,7 +99,7 @@
                 <form class="d-flex search-form ms-lg-4" action="{% url 'search_products' %}" method="GET">
                     <div class="input-group">
                         <input type="search" name="q" class="form-control rounded-pill"
-                               placeholder="搜索gal商品..."
+                               placeholder="搜索galgame..."
                                value="{{ request.GET.q|default:'' }}">
                         <button type="submit" class="btn btn-light rounded-pill ms-2">
                             <i class="fas fa-search"></i>
@@ -106,14 +107,14 @@
                     </div>
                 </form>
 
+
                 <!-- 右侧操作区 -->
                 <div class="d-flex align-items-center ms-auto">
-                    <!-- 购物车 -->
-                    <a href="#" class="text-white cart-icon mx-3">
+                    <!-- 购物车-->
+                    <a href="{% url 'cart_view' %}" class="text-white cart-icon mx-3">
                         <i class="fas fa-shopping-cart fa-lg"></i>
-                        <span class="cart-badge d-inline-flex align-items-center justify-content-center">3</span>
+                        <span class="cart-badge d-inline-flex align-items-center justify-content-center">{{ request.user.cart.items.count }}</span>
                     </a>
-
                     <!-- 账户管理 -->
                     <div class="dropdown account-dropdown">
                         {% if user.is_authenticated %}
@@ -152,7 +153,7 @@
 
     <!-- 页脚 -->
     <footer class="text-center">
-        <p class="mb-0">© {% now "Y" %} Cute Shop | 让每一天都充满galgame</p>
+        <p class="mb-0">© {% now "Y" %} Cute Shop | 让每一天都充满爱</p>
     </footer>
 
     <!-- 认证模态框 -->
