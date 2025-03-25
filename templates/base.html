@@ -1,280 +1,248 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN" data-bs-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Cute Shop{% endblock %}</title>
-  <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet">
-  <style>
-     /* 下拉菜单样式 */
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cute Shop{% endblock %}</title>
 
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      right: 0;
-      background-color: #fff;
-      min-width: 120px;
-      box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-      z-index: 1;
-      border-radius: 4px;
-    }
+    <!-- 字体和图标 -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    .dropdown-content a {
-      color: #333;
-      padding: 12px 16px;
-      text-decoration: none;
-      display: block;
-    }
+    <!-- 自定义样式 -->
+    <style>
+        :root {
+            --primary-pink: #ff80ab;
+            --secondary-pink: #f48fb1;
+            --background-pink: #ffffff;
+        }
 
-    .dropdown-content a:hover {
-      background-color: #f1f1f1;
-    }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--background-pink);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-    .dropdown:hover .dropdown-content {
-      display: block;
-    }
+        .cute-header {
+            background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
 
+        .brand-title {
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            transition: transform 0.3s ease;
+        }
 
-    body {
-      font-family: 'Nunito', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #fce4ec;
-      color: #333;
-      width : 100%;
-          overflow-x: hidden; /* 隐藏水平滚动条 */
+        .brand-title:hover {
+            transform: scale(1.05);
+        }
 
-    }
-    header {
-      background-color: #ff80ab;
-      color: #fff;
-      padding: 20px;
-      text-align: center;
-      position: relative;
-      border-bottom: 4px solid #f48fb1;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 2.5em;
-    }
-    /* 右上角区域 */
-    .account-area {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-    }
-    .account-area button,
-    .account-area span {
-      background: transparent;
-      border: none;
-      color: #fff;
-      font-size: 1em;
-      cursor: pointer;
-    }
-    /* Modal 样式 */
-    .modal {
-      display: none; /* 默认隐藏 */
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-    .modal-content {
-      background-color: #fff;
-      margin: 15% auto;
-      padding: 20px;
-      border: 1px solid #888;
-      width: 300px;
-      border-radius: 10px;
-      text-align: center;
-      position: relative;
-    }
-    .close {
-      position: absolute;
-      top: 5px;
-      right: 10px;
-      font-size: 1.2em;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .modal-content input {
-      width: 90%;
-      padding: 8px;
-      margin: 8px 0;
-    }
-    .modal-content button {
-      padding: 8px 16px;
-      background-color: #ff4081;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .modal-content a {
-      color: #ff4081;
-      text-decoration: none;
-      cursor: pointer;
-    }
-  </style>
-  {% block extra_head %}{% endblock %}
+        .search-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cart-icon {
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff4081;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 0.75rem;
+        }
+
+        .account-dropdown .dropdown-toggle::after {
+            display: none;
+        }
+
+        .modal-header {
+            background: var(--primary-pink);
+            color: white;
+        }
+
+        footer {
+            background: var(--primary-pink);
+            color: white;
+            margin-top: auto;
+            padding: 1.5rem;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
-  <header>
-      <h1>Welcome to Our Cute Shop!</h1>
-      <div class="account-area">
-        {% if user.is_authenticated %}
-          <div class="dropdown">
-            <span class="account-name">Hi, {{ user.username }}</span>
-            <div class="dropdown-content">
-              <!-- 修改后的登出链接（通过 JS 提交 POST 表单） -->
-              <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">登出</a>
+    <!-- 导航栏 -->
+    <header class="cute-header navbar navbar-expand-lg sticky-top">
+        <div class="container-fluid">
+            <!-- 品牌和响应式菜单按钮 -->
+            <a class="navbar-brand text-white brand-title" href="#">
+                🎀 Cute Shop
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- 主要导航区域 -->
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <!-- 搜索表单 -->
+                <form class="d-flex search-form ms-lg-4" action="{% url 'search_products' %}" method="GET">
+                    <div class="input-group">
+                        <input type="search" name="q" class="form-control rounded-pill"
+                               placeholder="搜索gal商品..."
+                               value="{{ request.GET.q|default:'' }}">
+                        <button type="submit" class="btn btn-light rounded-pill ms-2">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- 右侧操作区 -->
+                <div class="d-flex align-items-center ms-auto">
+                    <!-- 购物车 -->
+                    <a href="#" class="text-white cart-icon mx-3">
+                        <i class="fas fa-shopping-cart fa-lg"></i>
+                        <span class="cart-badge d-inline-flex align-items-center justify-content-center">3</span>
+                    </a>
+
+                    <!-- 账户管理 -->
+                    <div class="dropdown account-dropdown">
+                        {% if user.is_authenticated %}
+                            <button class="btn btn-link text-white dropdown-toggle"
+                                    data-bs-toggle="dropdown">
+                                👤 {{ user.username }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">我的订单</a></li>
+                                <li><a class="dropdown-item" href="#">个人资料</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form id="logout-form" action="{% url 'logout' %}" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item">登出</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        {% else %}
+                            <button class="btn btn-outline-light"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#authModal">
+                                登录/注册
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-          </div>
-          <!-- 隐藏的表单 -->
-          <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
-            {% csrf_token %}
-          </form>
-        {% else %}
-          <button id="show-login">登录</button>
-        {% endif %}
-      </div>
-  </header>
-  <!-- 主体内容 -->
-  <div class="container">
-    {% block content %}
-    <!-- 子模板内容将在此填充 -->
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="container my-4 flex-grow-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="text-center">
+        <p class="mb-0">© {% now "Y" %} Cute Shop | 让每一天都充满galgame</p>
+    </footer>
+
+    <!-- 认证模态框 -->
+    <div class="modal fade" id="authModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <!-- 模态框内容由JS动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_script %}
+    <script>
+        // 动态加载认证模态框内容
+        document.getElementById('authModal').addEventListener('show.bs.modal', function(event) {
+            const modalContent = `
+                <div class="modal-header">
+                    <h5 class="modal-title">欢迎回来 🎉</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-pills mb-4 justify-content-center" id="authTab">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#login" data-bs-toggle="tab">登录</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#register" data-bs-toggle="tab">注册</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="login">
+                            <form id="loginForm">
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" name="username" placeholder="用户名" required>
+                                </div>
+                                <div class="mb-4">
+                                    <input type="password" class="form-control" name="password" placeholder="密码" required>
+                                </div>
+                                <button class="btn btn-pink w-100">立即登录</button>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="register">
+                            <form id="registerForm">
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" name="username" placeholder="用户名" required>
+                                </div>
+                                <div class="mb-3">
+                                    <input type="email" class="form-control" name="email" placeholder="电子邮箱" required>
+                                </div>
+                                <div class="mb-4">
+                                    <input type="password" class="form-control" name="password" placeholder="设置密码" required>
+                                </div>
+                                <button class="btn btn-pink w-100">免费注册</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+            this.querySelector('.modal-content').innerHTML = modalContent;
+        });
+
+        // 表单提交处理（示例）
+        document.addEventListener('submit', function(e) {
+            if (e.target.matches('#loginForm, #registerForm')) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const endpoint = e.target.id === 'loginForm' ? '/login/' : '/register/';
+
+                fetch(endpoint, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': '{% csrf_token %}',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.message || '操作失败');
+                    }
+                });
+            }
+        });
+    </script>
     {% endblock %}
-  </div>
-
-  <footer>
-    &copy; {% now "Y" %} Cute Shop. All rights reserved.
-  </footer>
-
-  {% if not user.is_authenticated %}
-  <!-- 登录模态窗口 -->
-  <div id="login-modal" class="modal">
-    <div class="modal-content">
-      <span class="close" id="close-login">&times;</span>
-      <h2>请登录</h2>
-      <form id="modal-login-form">
-        <input type="text" name="username" placeholder="用户名" required>
-        <input type="password" name="password" placeholder="密码" required>
-        <button type="submit">登录</button>
-      </form>
-      <p>还没有账户？ <a id="to-register">注册</a></p>
-    </div>
-  </div>
-  <!-- 注册模态窗口 -->
-  <div id="register-modal" class="modal">
-    <div class="modal-content">
-      <span class="close" id="close-register">&times;</span>
-      <h2>注册</h2>
-      <form id="modal-register-form">
-        <input type="text" name="username" placeholder="用户名" required>
-        <input type="password" name="password" placeholder="密码" required>
-        <button type="submit">注册</button>
-      </form>
-      <p>已有账户？ <a id="to-login">登录</a></p>
-    </div>
-  </div>
-  {% endif %}
-
-  {% block extra_script %}
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      // 如果未登录，自动显示登录窗口
-      {% if not user.is_authenticated %}
-      var loginModal = document.getElementById("login-modal");
-      var registerModal = document.getElementById("register-modal");
-      loginModal.style.display = "block";
-
-      // 切换到注册窗口
-      document.getElementById("to-register").addEventListener("click", function() {
-        loginModal.style.display = "none";
-        registerModal.style.display = "block";
-      });
-      // 切换到登录窗口
-      document.getElementById("to-login").addEventListener("click", function() {
-        registerModal.style.display = "none";
-        loginModal.style.display = "block";
-      });
-
-      // 登录按钮（右上角）触发登录窗口
-      var showLoginBtn = document.getElementById("show-login");
-      if (showLoginBtn) {
-        showLoginBtn.addEventListener("click", function() {
-          loginModal.style.display = "block";
-          registerModal.style.display = "none";
-        });
-      }
-      // 关闭按钮逻辑
-      document.getElementById("close-login").addEventListener("click", function() {
-        loginModal.style.display = "none";
-      });
-      document.getElementById("close-register").addEventListener("click", function() {
-        registerModal.style.display = "none";
-      });
-
-      // 登录表单提交
-      document.getElementById("modal-login-form").addEventListener("submit", function(event) {
-        event.preventDefault();
-        var formData = new FormData(this);
-        fetch("/login/", {
-          method: "POST",
-          body: formData,
-          credentials: 'include'
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            alert("登录成功！");
-            location.reload();
-          } else {
-            alert(data.error || "登录失败，请检查用户名或密码");
-          }
-        })
-        .catch(error => {
-          console.error("登录请求错误：", error);
-          alert("登录请求出错");
-        });
-      });
-
-      // 注册表单提交
-      document.getElementById("modal-register-form").addEventListener("submit", function(event) {
-        event.preventDefault();
-        var formData = new FormData(this);
-        fetch("/register/", {
-          method: "POST",
-          body: formData,
-          credentials: 'include'
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            alert("注册成功，请登录！");
-            // 切换到登录窗口
-            registerModal.style.display = "none";
-            loginModal.style.display = "block";
-          } else {
-            alert(data.error || "注册失败");
-          }
-        })
-        .catch(error => {
-          console.error("注册请求错误：", error);
-          alert("注册请求出错");
-        });
-      });
-      {% endif %}
-    });
-  </script>
-  {% endblock %}
 </body>
 </html>

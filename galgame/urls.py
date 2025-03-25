@@ -27,4 +27,6 @@ urlpatterns = [
     path('login/', views.user_login, name='login'),
     path('register/', views.user_register, name='register'),
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
+    # 搜索URL
+    path('search/', views.search_products, name='search_products'),
 ]

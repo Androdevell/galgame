@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 # Create your views here.
 def index(request):
     return render(request,"index.html")
@@ -42,3 +43,21 @@ def user_register(request):
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
     return JsonResponse({"success": False, "error": "仅支持POST请求"})
+
+
+def search_products(request):
+    query = request.GET.get('q', '')
+    products = []
+
+    if query:
+        # 使用Q对象进行复杂查询（名称或描述中包含查询文本）
+        products = Product.objects.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query)
+        ).distinct()
+
+    context = {
+        'query': query,
+        'products': products,
+    }
+    return render(request, 'search_results.html', context)

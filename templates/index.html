@@ -4,82 +4,195 @@
 
 {% block extra_head %}
 <style>
-  .product-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    grid-gap: 10px;
-  }
-  .product {
-    background-color: #fff;
-    margin: 35px;
-    padding: 25px;
-    border-radius: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    transition: transform 0.3s;
-    width: 310px;
-  }
-  .product:hover {
-    transform: scale(1.05);
-  }
-  .product img {
-    width: 100%;
-    border-radius: 17px;
-    margin-bottom: 16px;
-  }
-  .product h3 {
-    font-size: 1.5em;
-    margin-bottom: 10px;
-    color: #ff4081;
-  }
-  .product p {
-    font-size: 1.0em;
-    margin-bottom: 10px;
-  }
-  .product price {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #e91e63;
-  }
-  .product discount-price {
-    font-size: 1.4em;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #e91e63;
-  }
-  .detail-button {
-    display: block;
-    margin-top: 20px;
-    padding: 10px 15px;
-    background-color: #ff4081;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 17px;
-    transition: background-color 0.3s;
-  }
-  .detail-button:hover {
-    background-color: #e91e63;
-  }
+    :root {
+        --product-card-bg: #ffffff;
+        --price-color: #e91e63;
+        --highlight-pink: #ff4081;
+    }
+
+    /* 产品网格布局 */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+        padding: 1.5rem;
+    }
+
+    /* 产品卡片 */
+    .product-card {
+        background: var(--product-card-bg);
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid #ffe5f0;
+        color: lightpink;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(255, 64, 129, 0.15);
+        color: red;
+    }
+    /* 图片容器 */
+    .product-media {
+        position: relative;
+        border-radius: 5rem;
+        overflow: hidden;
+        aspect-ratio: 1/1;
+        background: #fff;
+        width: 340px;
+        height: 250px;
+        color: #000000;S
+    }
+
+    .product-media img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: contain;
+        padding: 1rem;
+        transition: transform 0.3s ease;
+        border-radius: 1.2rem;
+    }
+
+    .product-card:hover .product-media img {
+        transform: scale(1.05);
+    }
+
+    /* 内容区域 */
+    .product-content {
+        padding: 1.5rem 0 0;
+    }
+
+    .product-title {
+        color: var(--highlight-pink);
+        font-size: 1.3rem;
+        margin-bottom: 0.75rem;
+        font-weight: 700;
+    }
+
+    .product-description {
+        color: #666;
+        font-size: 0.95rem;
+        margin-bottom: 1.2rem;
+        min-height: 4em;
+        line-height: 1.5;
+    }
+
+    /* 价格区域 */
+    .price-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .original-price {
+        color: #999;
+        font-size: 0.95rem;
+    }
+
+    .discount-price {
+        color: var(--price-color);
+        font-size: 1.4rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .discount-badge {
+        background: var(--highlight-pink);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.75rem;
+        font-size: 0.9rem;
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        z-index: 2;
+    }
+
+    /* 操作按钮 */
+    .detail-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, var(--highlight-pink), #ff80ab);
+        color: white !important;
+        border-radius: 1.5rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        width: 100%;
+        font-weight: 600;
+        border: none;
+    }
+
+    .detail-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 64, 129, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .product-grid {
+            grid-template-columns: 1fr;
+            padding: 1rem;
+        }
+
+        .product-card {
+            margin: 0;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="product-list">
-  {% for product in products %}
-  <div class="product">
-    <img src="{{ product.image_url }}" alt="{{ product.name }}">
-    <h3>{{ product.name }}</h3>
-    <p>{{ product.description }}</p>
-    {% if product.is_holiday_discount_active and product.holiday_discount_price %}
-    <price>原价：<del>{{ product.price }}￥</del></price>
-    <discount-price>折扣价：<strong>{{ product.holiday_discount_price }}￥</strong></discount-price>
-    {% else %}
-        <price>价格：{{ product.price }}￥</price>
-    {% endif %}
+<main class="container py-5">
+    <h2 class="text-center mb-5 display-5 fw-bold" style="color: var(--highlight-pink);">
+        时尚单品，限时抢购 Ciallo～(∠・ω<)⌒★
+    </h2>
 
-    <a href="{% url 'product_detail' product.id %}" class="detail-button">查看详情</a>
-  </div>
-  {% endfor %}
-</div>
+    <div class="product-grid">
+        {% for product in products %}
+        <article class="product-card">
+            {% if product.is_holiday_discount_active and product.holiday_discount_price %}
+                <span class="discount-badge">限时{{ product.discount_percent|default:"20" }}%折扣!</span>
+            {% endif %}
+
+            <div class="product-media">
+                <img src="{{ product.image_url }}"
+                     alt="{{ product.name }}"
+                     loading="lazy">
+            </div>
+
+            <div class="product-content">
+                <h3 class="product-title">{{ product.name }}</h3>
+                <p class="product-description">{{ product.description|truncatechars:100 }}</p>
+
+                <div class="price-container">
+                    {% if product.is_holiday_discount_active and product.holiday_discount_price %}
+                        <span class="original-price">
+                            <del>¥{{ product.price }}</del>
+                        </span>
+                        <div class="discount-price">
+                            <span>¥{{ product.holiday_discount_price }}</span>
+                            🔥
+                        </div>
+                    {% else %}
+                        <div class="discount-price">¥{{ product.price }}</div>
+                    {% endif %}
+                </div>
+
+                <a href="{% url 'product_detail' product.id %}"
+                   class="detail-button">
+                    <i class="fas fa-heart me-2"></i>立即查看
+                </a>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</main>
 {% endblock %}

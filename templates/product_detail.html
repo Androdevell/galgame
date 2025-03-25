@@ -1,67 +1,277 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ product.name }}</title>
-  <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Nunito', sans-serif;
-      background-color: #fce4ec;
-      margin: 0;
-      padding: 20px;
-    }
-    .product-detail {
-      max-width: 600px;
-      margin: auto;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .product-detail img {
-      width: 100%;
-      border-radius: 10px;
-    }
-    .product-detail h1 {
-      color: #ff4081;
-    }
-    .product-detail price {
-      font-size: 1.2em;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #e91e63;
-    }
-    .detail-button
-    {
-      display: block;
-      margin-top: 20px;
-      margin-bottom: 20px;
-      padding: 10px 15px;
-      background-color: #ff4081;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 17px;
-      width: 8%;
-      transition: background-color 0.3s;
-    }
-  </style>
-</head>
-<body>
-  <div class="product-detail">
-    <img src="{{ product.image_url }}" alt="{{ product.name }}">
-    <h1>{{ product.name }}</h1>
-    <p>{{ product.description }}</p>
-    {% if product.is_holiday_discount_active and product.holiday_discount_price %}
-    <price>原价：<del>{{ product.price }}</del></price>
-    <price>折扣价：<strong>{{ product.holiday_discount_price }}</strong></price>
-    {% else %}
-        <price>价格：{{ product.price }}</price>
-    {% endif %}
-    <a href="{% url 'product_detail' product.id %}" class="detail-button">购买</a>
+{% extends "base.html" %}
 
-    <a href="{% url 'index' %}">返回主页</a>
-  </div>
-</body>
-</html>
+{% block title %}{{ product.name }} - Cute Shop{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* 自定义颜色变量 */
+    :root {
+        --product-gallery-bg: #fff5f9;
+        --accent-pink: #ff4081;
+        --price-red: #e91e63;
+    }
+
+    /* 商品主容器 */
+    .product-main {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    /* 商品展示网格 */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 3rem;
+        align-items: start;
+    }
+
+    /* 图片画廊 */
+    .gallery-container {
+        position: relative;
+        background: var(--product-gallery-bg);
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        box-shadow: 0 8px 24px rgba(255, 64, 129, 0.1);
+    }
+
+    .main-image {
+        width: 100%;
+        border-radius: 1.2rem;
+        aspect-ratio: 1/1;
+        object-fit: contain;
+        cursor: zoom-in;
+        transition: transform 0.3s ease;
+    }
+
+    .thumbnail-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .thumbnail {
+        width: 100%;
+        border-radius: 0.8rem;
+        aspect-ratio: 1/1;
+        object-fit: cover;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .thumbnail.active {
+        box-shadow: 0 0 0 3px var(--accent-pink);
+    }
+
+    /* 商品信息面板 */
+    .product-info {
+        position: sticky;
+        top: 2rem;
+        padding: 2rem;
+        background: white;
+        border-radius: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .product-title {
+        font-size: 2.2rem;
+        color: var(--accent-pink);
+        margin-bottom: 1.5rem;
+    }
+
+    .price-section {
+        display: flex;
+        align-items: baseline;
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .original-price {
+        font-size: 1.4rem;
+        color: #999;
+    }
+
+    .discount-price {
+        font-size: 2rem;
+        color: var(--price-red);
+        font-weight: 700;
+    }
+
+    /* 购买操作区 */
+    .action-buttons {
+        display: grid;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .buy-button {
+        padding: 1.2rem;
+        font-size: 1.1rem;
+        background: linear-gradient(135deg, var(--accent-pink), #ff80ab);
+        border: none;
+        border-radius: 1rem;
+        color: white;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+    }
+
+    .buy-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(255, 64, 129, 0.3);
+    }
+
+    /* 商品详情 */
+    .product-description {
+        line-height: 1.8;
+        font-size: 1.3rem;
+        color: #555;
+        margin: 0rem 0;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+        .product-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .product-title {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="product-main">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">主页</a></li>
+            <li class="breadcrumb-item active">{{ product.category }}</li>
+        </ol>
+    </nav>
+
+    <div class="product-grid">
+        <!-- 图片展示区 -->
+        <section class="gallery-container">
+            <div class="badge bg-danger fs-5 position-absolute top-0 end-0 m-3">
+                {{ product.discount_percent }}% OFF
+            </div>
+            <img src="{{ product.image_url }}"
+                 class="main-image"
+                 alt="{{ product.name }}"
+                 loading="eager">
+            <div class="thumbnail-grid">
+                {% for img in product.images.all %}
+                <img src="{{ img.url }}"
+                     class="thumbnail {% if forloop.first %}active{% endif %}"
+                     alt="预览图{{ forloop.counter }}"
+                     loading="lazy">
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- 商品信息区 -->
+        <section class="product-info">
+            <h1 class="product-title">{{ product.name }}</h1>
+
+            <div class="price-section">
+                {% if product.is_holiday_discount_active %}
+                <span class="original-price">
+                    <del>¥{{ product.price }}</del>
+                </span>
+                <span class="discount-price">
+                    ¥{{ product.holiday_discount_price }}
+                </span>
+                {% else %}
+                <span class="discount-price">
+                    ¥{{ product.price }}
+                </span>
+                {% endif %}
+            </div>
+
+            <!-- 商品规格 -->
+            <div class="specs">
+                <h3 class="mb-3">商品规格</h3>
+                <dl class="row">
+                    <dt class="col-sm-3">型号</dt>
+                    <dd class="col-sm-9">{{ product.model_number }}</dd>
+
+                    <dt class="col-sm-3">材质</dt>
+                    <dd class="col-sm-9">{{ product.material }}</dd>
+
+                    <dt class="col-sm-3">尺寸</dt>
+                    <dd class="col-sm-9">{{ product.dimensions }}</dd>
+                </dl>
+            </div>
+            <!-- 商品详细描述 -->
+            <article class="product-description">
+                {{ product.description }}
+            </article>
+
+            <div class="action-buttons">
+                <button class="buy-button">
+                    <i class="fas fa-shopping-cart"></i>
+                    加入购物车
+                </button>
+                <button class="buy-button">
+                    <i class="fas fa-bolt"></i>
+                    立即购买
+                </button>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+    // 缩略图切换功能
+    document.querySelectorAll('.thumbnail').forEach(thumb => {
+        thumb.addEventListener('click', function() {
+            // 移除所有激活状态
+            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+
+            // 更新主图
+            const mainImg = document.querySelector('.main-image');
+            mainImg.src = this.src;
+            mainImg.alt = this.alt;
+
+            // 设置当前激活状态
+            this.classList.add('active');
+        });
+    });
+
+    // 图片放大预览
+    document.querySelector('.main-image').addEventListener('click', function() {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.8);
+            z-index: 9999;
+            cursor: zoom-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        `;
+
+        const zoomImg = new Image();
+        zoomImg.src = this.src;
+        zoomImg.style.maxWidth = '90vw';
+        zoomImg.style.maxHeight = '90vh';
+        zoomImg.style.objectFit = 'contain';
+
+        overlay.appendChild(zoomImg);
+        document.body.appendChild(overlay);
+
+        overlay.addEventListener('click', () => overlay.remove());
+    });
+</script>
+{% endblock %}
