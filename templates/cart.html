@@ -1,104 +1,70 @@
+<!-- 创建cart.html新模板 -->
 {% extends 'base.html' %}
 
-{% block title %}购物车 - 我的商店{% endblock %}
+{% block title %}购物车{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <!-- 标题与状态信息 -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 font-weight-bold text-primary">我的购物车</h1>
-    <span class=" text-primary badge badge-pill badge-info">共 {{ cart.items.count }} 件商品</span>
-  </div>
+<div class="container">
+  <h1 class="my-4">购物车</h1>
 
-  <!-- 购物车内容 -->
   {% if cart.items.count > 0 %}
-    <div class="card shadow-sm border-0">
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table mb-0">
-            <!-- 表头优化 -->
-            <thead class="bg-light">
-              <tr>
-                <th scope="col" class="border-0" style="width: 40%">商品信息</th>
-                <th scope="col" class="border-0 text-center">单价</th>
-                <th scope="col" class="border-0 text-center">数量</th>
-                <th scope="col" class="border-0 text-center">小计</th>
-                <th scope="col" class="border-0"></th>
-              </tr>
-            </thead>
-
-            <!-- 商品列表 -->
-            <tbody>
-              {% for item in cart.items.all %}
-                <tr class="align-middle">
-                  <!-- 商品图片与名称 -->
-                  <td>
-                    <div class="d-flex align-items-center">
-                      {% if item.product.image %}
-                        <img src="{{ item.product.image.url }}" 
-                             alt="{{ item.product.name }}" 
-                             class="img-fluid rounded shadow-sm mr-3" 
-                             style="width: 60px; height: 60px; object-fit: cover;">
-                      {% endif %}
-                      <div>
-                        <a href="{% url 'product_detail' item.product.id %}" 
-                           class="text-dark font-weight-bold d-block">{{ item.product.name }}</a>
-                        <small class="text-muted">SKU: {{ item.product.sku }}</small> <!-- 例: 显示商品SKU -->
-                      </div>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>商品</th>
+            <th>单价</th>
+            <th>数量</th>
+            <th>小计</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cart.items.all %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  {% if item.product.image_url %}
+                    <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="img-thumbnail mr-3" style="width: 50px;">
+                  {% endif %}
+                  <a href="{% url 'product_detail' item.product.id %}">{{ item.product.name }}</a>
+                </div>
+              </td>
+              <td class="text-center text-success font-weight-bold">
+                ¥{{ item.product.price }}
+              </td>
+              <td>
+                <form method="post" action="{% url 'update_cart' item.id %}" class="form-inline">
+                  {% csrf_token %}
+                  <div class="input-group input-group-sm">
+                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control" style="width: 60px;">
+                    <div class="input-group-append">
+                      <button type="submit" class="btn btn-outline-secondary">更新</button>
                     </div>
-                  </td>
-
-                  <!-- 单价 -->
-                  <td class="text-center text-success font-weight-bold">
-                    ¥{{ item.product.price }}
-                  </td>
-
-                  <!-- 数量输入 (优化交互) -->
-                  <td>
-                    <form method="post" 
-                          action="{% url 'update_cart' item.id %}" 
-                          class="update-quantity-form">
-                      {% csrf_token %}
-                      <div class="input-group input-group-sm mx-auto" style="width: 120px;">
-                        <div class="input-group-prepend">
-                          <button type="button" 
-                                  class="btn btn-outline-secondary quantity-minus">-</button>
-                        </div>
-                        <input type="number" 
-                               name="quantity" 
-                               value="{{ item.quantity }}" 
-                               min="1" 
-                               class="form-control text-center border-secondary" 
-                               data-stock="{{ item.product.stock }}"> <!-- 关联库存字段 -->
-                        <div class="input-group-append">
-                          <button type="button" 
-                                  class="btn btn-outline-secondary quantity-plus">+</button>
-                        </div>
-                      </div>
-                    </form>
-                  </td>
-
-                  <!-- 小计 -->
-                  <td class="text-center text-danger font-weight-bold">
+                  </div>
+                </form>
+              </td>k
+                 <td class="text-center text-danger font-weight-bold">
                     ¥{{ item.get_cost }}
-                  </td>
-
-                  <!-- 删除按钮 (视觉优化) -->
-                  <td>
-                    <button class="btn btn-link text-danger delete-item" 
-                            data-url="{% url 'remove_from_cart' item.id %}">
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- 总计栏 -->
-      <div class="card-footer bg-white border-0">
+                 </td>
+              <td>
+                <a href="{% url 'remove_from_cart' item.id %}" class="btn btn-link text-danger delete-item">
+                  <i class="fas fa-trash"></i> 删除
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" class="text-right"><strong>总计:</strong></td>
+            <td><strong>{{ cart.get_total_price }}</strong></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+            <!-- 总计栏 -->
+      <div class="card-footer border-0">
         <div class="d-flex justify-content-end align-items-center">
           <div class="h5 mb-0 mr-3">订单总计：</div>
           <div class="h3 text-danger font-weight-bold">¥{{ cart.get_total_price }}</div>
@@ -106,47 +72,52 @@
       </div>
     </div>
 
-    <!-- 操作按钮组 -->
     <div class="d-flex justify-content-between mt-4">
-      <a href="{% url 'index' %}" 
+      <a href="{% url 'index' %}"
          class="btn btn-outline-primary btn-lg rounded-pill px-4">
         <i class="fas fa-chevron-left mr-2"></i>继续选购
       </a>
-      <a href="#" 
+      <a href="#"
          class="btn btn-success btn-lg rounded-pill px-5 checkout-btn">
         去结算 <i class="fas fa-credit-card ml-2"></i>
       </a>
     </div>
-
   {% else %}
-    <!-- 空购物车提示 -->
-    <div class="card shadow-sm border-0 text-center py-5">
-      <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
-      <h4 class="text-muted mb-3">您的购物车是空的</h4>
-      <a href="{% url 'index' %}" class="btn btn-primary rounded-pill px-4">
-        去逛逛 <i class="fas fa-arrow-right ml-2"></i>
-      </a>
+    <div class="alert alert-info">
+      您的购物车是空的。 <a href="{% url 'index' %}">继续购物</a>
     </div>
   {% endif %}
 </div>
 {% endblock %}
 
+<!-- 添加一个JavaScript处理AJAX请求 -->
 {% block extra_js %}
 <script>
-$(document).ready(function() {
-  // +/- 按钮点击事件
-  $('.quantity-minus').click(function() {
-    var input = $(this).closest('.input-group').find('input');
-    var newVal = parseInt(input.val()) - 1;
-    input.val(newVal > 0 ? newVal : 1).trigger('change');
-  });
+  $(document).ready(function() {
+    // 使用AJAX添加到购物车
+    $('.add-to-cart-form').on('submit', function(e) {
+      e.preventDefault();
+      var form = $(this);
 
-  $('.quantity-plus').click(function() {
-    var input = $(this).closest('.input-group').find('input');
-    var stock = parseInt(input.data('stock')); // 获取库存值
-    var newVal = parseInt(input.val()) + 1;
-    input.val(newVal <= stock ? newVal : stock).trigger('change');
+      $.ajax({
+        url: form.attr('action'),
+        type: 'POST',
+        data: form.serialize(),
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+        success: function(data) {
+          if (data.success) {
+            // 更新购物车数量
+            $('.cart-count').text($('.cart-count').text()*1 + 1);
+
+            // 显示成功消息
+            $('<div class="alert alert-success">商品已添加到购物车</div>')
+              .insertAfter(form)
+              .delay(2000)
+              .fadeOut();
+          }
+        }
+      });
+    });
   });
-});
 </script>
-{% endblock %}
+{% endblock %}f

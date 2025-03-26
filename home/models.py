@@ -7,6 +7,7 @@ class Product(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=8, decimal_places=2)
+    stock = models.IntegerField(default=20)
     image_url = models.URLField(max_length=200, blank=True)
     desimage_url = models.URLField(max_length=200, blank=True)
     holiday_discount_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
@@ -47,6 +48,8 @@ class CartItem(models.Model):
         return f"{self.quantity} x {self.product.name}"
 
     def get_cost(self):
+        if self.product.is_holiday_discount_active and self.product.holiday_discount_price:
+            return self.product.holiday_discount_price* self.quantity
         return self.product.price * self.quantity
 
 # 用信号确保每个用户都有一个购物车
