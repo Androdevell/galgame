@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-5">
+    <div class="profile-card shadow-lg rounded-4 p-4 bg-white">
+        <div class="d-flex align-items-center mb-5">
+            <h2 class="h3 fw-bold mb-0 text-gradient-primary">个人资料设置</h2>
+            <i class="fas fa-user-edit ms-2 text-muted"></i>
+        </div>
+
+        <form method="post" action="{% url 'profile' %}">
+            {% csrf_token %}
+            
+            <!-- 用户基础信息区块 -->
+            <div class="profile-section mb-4">
+                <h4 class="h5 mb-3 text-secondary border-bottom pb-2">
+                    <i class="fas fa-id-card me-2"></i>基本信息
+                </h4>
+                
+                <div class="mb-3">
+                    <label class="form-label text-dark small mb-1">用户名</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-at"></i></span>
+                        <input type="text" class="form-control form-control-lg rounded-end" 
+                               value="{{ user.username }}" disabled>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="email" class="form-label text-dark small mb-1">电子邮箱</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        <input type="email" class="form-control form-control-lg" id="email" name="email"
+                               value="{{ user.email }}" required>
+                    </div>
+                    <small class="form-text text-muted">建议使用常用邮箱地址</small>
+                </div>
+            </div>
+
+            <!-- 姓名信息区块 -->
+            <div class="profile-section mb-4">
+                <h4 class="h5 mb-3 text-secondary border-bottom pb-2">
+                    <i class="fas fa-user-tag me-2"></i>姓名信息
+                </h4>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="first_name" class="form-label text-dark small mb-1">名字</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-signature"></i></span>
+                            <input type="text" class="form-control form-control-lg" id="first_name" 
+                                   name="first_name" value="{{ user.first_name }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="last_name" class="form-label text-dark small mb-1">姓氏</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-signature"></i></span>
+                            <input type="text" class="form-control form-control-lg" id="last_name" 
+                                   name="last_name" value="{{ user.last_name }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="d-flex justify-content-end gap-3 mt-5">
+                <button type="reset" class="btn btn-lg btn-outline-secondary">
+                    <i class="fas fa-undo me-2"></i>重置修改
+                </button>
+                <button type="submit" class="btn btn-lg btn-primary px-4 rounded-pill">
+                    <i class="fas fa-save me-2"></i>保存设置
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.profile-card {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.text-gradient-primary {
+    background: linear-gradient(45deg, #007bff, #00b4ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.form-control {
+    border-radius: 0.5rem !important;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border-right: 0;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0069d9, #007bff);
+    border: none;
+    transition: transform 0.2s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+}
+
+.profile-section {
+    padding: 1.5rem;
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+</style>
+{% endblock %}

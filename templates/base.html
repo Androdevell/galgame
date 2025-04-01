@@ -85,7 +85,7 @@
     <header class="cute-header navbar navbar-expand-lg sticky-top">
         <div class="container-fluid">
             <!-- 品牌和响应式菜单按钮 -->
-            <a class="navbar-brand text-white brand-title" href="#">
+            <a class="navbar-brand text-white brand-title" href="{% url 'index' %}">
                 🎀 Yuzo Shop
             </a>
 
@@ -123,8 +123,8 @@
                                 👤 {{ user.username }}
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#">我的订单</a></li>
-                                <li><a class="dropdown-item" href="#">个人资料</a></li>
+                                <li><a class="dropdown-item" href="{% url 'orders' %}">我的订单</a></li>
+                                <li><a class="dropdown-item" href="{% url 'profile' %}">个人资料</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form id="logout-form" action="{% url 'logout' %}" method="post">

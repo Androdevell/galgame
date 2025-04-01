@@ -5,7 +5,8 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
-from .models import Product, Cart, CartItem
+from django.contrib import messages
+from .models import Product, Cart, CartItem,Profile
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 def index(request):
@@ -98,6 +99,7 @@ def add_to_cart(request, product_id):
 @login_required
 def update_cart(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    cart = cart_item.cart
 
     if request.method == 'POST':
         quantity = int(request.POST.get('quantity', 1))
@@ -107,8 +109,15 @@ def update_cart(request, item_id):
         else:
             cart_item.delete()
 
-    return redirect('cart_view')
+        # 处理AJAX请求
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'cart_total': cart.get_total_price(),
+                'item_subtotal': cart_item.get_cost()
+            })
 
+    return redirect('cart_view')
 
 @login_required
 def remove_from_cart(request, item_id):
@@ -122,3 +131,40 @@ def remove_from_cart(request, item_id):
             'cart_total': cart.get_total_price()
         })
     return redirect('cart_view')
+
+
+@login_required
+def update_profile(request):
+    # 确保当前用户有 Profile 对象，如果没有则创建一个
+    profile, created = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        user = request.user
+        email = request.POST.get('email')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+
+        # 更新用户信息
+        if email:
+            user.email = email
+        if first_name:
+            user.first_name = first_name
+        if last_name:
+            user.last_name = last_name
+        user.save()
+
+        # 如果你需要更新 Profile 中其他字段，可以在这里添加处理逻辑，例如：
+        # phone = request.POST.get('phone')
+        # if phone:
+        #     profile.phone = phone
+        # profile.save()
+
+        messages.success(request, "个人信息已成功更新！")
+        return redirect('profile')
+
+    return render(request, 'profile.html')
+
+def orders_view(request):
+    # 假设有一个 Order 模型，并且用户订单可以通过 user.orders.all() 获取
+    orders = request.user.orders.all()
+    return render(request, 'orders.html', {'orders': orders})

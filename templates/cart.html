@@ -30,7 +30,7 @@
                   <a href="{% url 'product_detail' item.product.id %}">{{ item.product.name }}</a>
                 </div>
               </td>
-              <td class="text-center text-success font-weight-bold">
+              <td class="text-left text-success font-weight-bold">
                 ¥{{ item.product.price }}
               </td>
               <td>
@@ -43,7 +43,7 @@
                     </div>
                   </div>
                 </form>
-              </td>k
+              </td>
                  <td class="text-center text-danger font-weight-bold">
                     ¥{{ item.get_cost }}
                  </td>
