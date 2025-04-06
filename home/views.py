@@ -6,8 +6,13 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from django.contrib import messages
-from .models import Product, Cart, CartItem,Profile
+from .models import Product, Cart, CartItem
+from .models import Order, OrderItem, Profile
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
+
+from decimal import Decimal
+import uuid
 # Create your views here.
 def index(request):
     return render(request,"index.html")
@@ -158,8 +163,16 @@ def update_profile(request):
         # if phone:
         #     profile.phone = phone
         # profile.save()
-
-        messages.success(request, "个人信息已成功更新！")
+        new_payment_password = request.POST.get('new_payment_password')
+        if new_payment_password:
+            if len(new_payment_password) != 6 or not new_payment_password.isdigit():
+                messages.error(request, "支付密码必须为6位数字")
+            else:
+                profile.payment_password = new_payment_password
+                profile.save()
+                messages.success(request, "支付密码更新成功！")
+        else:
+            messages.success(request, "个人信息更新成功！")
         return redirect('profile')
 
     return render(request, 'profile.html')
@@ -168,3 +181,70 @@ def orders_view(request):
     # 假设有一个 Order 模型，并且用户订单可以通过 user.orders.all() 获取
     orders = request.user.orders.all()
     return render(request, 'orders.html', {'orders': orders})
+
+
+# checkout 视图示例 (部分代码)
+@login_required
+def checkout(request):
+    # 获取当前用户的购物车
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    total_price = cart.get_total_price()
+    cart_total = cart.get_total_price()
+    print(total_price)
+    print(cart_total)
+    if request.method == 'POST':
+        payment_method = request.POST.get('payment_method')
+
+        # 余额支付处理
+        if payment_method == 'balance':
+            input_password = request.POST.get('payment_password')
+            profile, created = Profile.objects.get_or_create(user=request.user)
+            if not profile.payment_password:
+                messages.error(request, "您还未设置支付密码，请先设置支付密码。")
+                return redirect('checkout')
+            if input_password != profile.payment_password:
+                messages.error(request, "支付密码错误，请重新输入。")
+                return redirect('checkout')
+            if profile.balance < cart_total:
+                messages.error(request, "余额不足，请选择其他支付方式或充值。")
+                return redirect('checkout')
+            # 扣除余额（确保类型匹配）
+            profile.balance -= cart_total
+            profile.save()
+
+        # 其他支付方式逻辑可以在这里补充
+
+        # 生成唯一订单号
+        order_number = str(uuid.uuid4()).replace('-', '').upper()[:20]
+        order = Order.objects.create(
+            user=request.user,
+            order_number=order_number,
+            total_amount=cart_total,
+            status='pending'
+        )
+
+        # 将购物车中的每个 CartItem 转为订单项
+        for cart_item in cart.items.all():
+            OrderItem.objects.create(
+                order=order,
+                product=cart_item.product,
+                quantity=cart_item.quantity,
+                price=(cart_item.product.holiday_discount_price
+                       if cart_item.product.is_holiday_discount_active and cart_item.product.holiday_discount_price
+                       else cart_item.product.price)
+            )
+        # 清空购物车
+        cart.items.all().delete()
+
+        messages.success(request, f"订单 {order.order_number} 创建成功！")
+        return redirect('orders')
+        # 获取用户余额
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    balance = profile.balance
+    return render(request, 'checkout.html', {'total_price': total_price, 'balance': balance})
+
+@login_required
+def order_detail(request, order_id):
+    # 确保订单只允许对应用户查看
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'order_detail.html', {'order': order})

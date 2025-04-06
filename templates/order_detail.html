@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <!-- 面包屑导航 -->
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'index' %}"><i class="fas fa-home"></i></a></li>
+          <li class="breadcrumb-item"><a href="{% url 'orders' %}"><i class="fas fa-gift"></i></a></li>
+          <li class="breadcrumb-item active" aria-current="page">订单详情</li>
+        </ol>
+      </nav>
+
+      <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-white pt-4 pb-3 border-bottom">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h4 class="mb-1">订单 #{{ order.order_number }}</h4>
+              <p class="text-muted mb-0">下单时间: {{ order.created_at|date:"Y-m-d H:i" }}</p>
+            </div>
+            <div>
+              {% if order.status == '已完成' %}
+                <span class="badge bg-success fs-6 rounded-pill px-3 py-2">{{ order.status }}</span>
+              {% elif order.status == '待支付' %}
+                <span class="badge bg-warning text-dark fs-6 rounded-pill px-3 py-2">{{ order.status }}</span>
+              {% elif order.status == '已取消' %}
+                <span class="badge bg-danger fs-6 rounded-pill px-3 py-2">{{ order.status }}</span>
+              {% elif order.status == '处理中' %}
+                <span class="badge bg-info fs-6 rounded-pill px-3 py-2">{{ order.status }}</span>
+              {% elif order.status == '已发货' %}
+                <span class="badge bg-primary fs-6 rounded-pill px-3 py-2">{{ order.status }}</span>
+              {% else %}
+                <span class="badge bg-secondary fs-6 rounded-pill px-3 py-2">{{ order.status }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body p-4">
+          <!-- 订单进度条 -->
+          {% if order.status != '已取消' %}
+          <div class="order-progress mb-5">
+            <div class="row">
+              <div class="col progress-step {% if order.status != '待支付' %}active{% endif %}">
+                <div class="progress-marker">1</div>
+                <div class="progress-text mt-2">订单创建</div>
+                <div class="progress-time">{{ order.created_at|date:"m-d H:i" }}</div>
+              </div>
+              <div class="col progress-step {% if order.status != '待支付' and order.status != '订单创建' %}active{% endif %}">
+                <div class="progress-marker">2</div>
+                <div class="progress-text mt-2">支付完成</div>
+                <div class="progress-time">{% if order.paid_at %}{{ order.paid_at|date:"m-d H:i" }}{% else %}-{% endif %}</div>
+              </div>
+              <div class="col progress-step {% if order.status == '已发货' or order.status == '已完成' %}active{% endif %}">
+                <div class="progress-marker">3</div>
+                <div class="progress-text mt-2">商品发货</div>
+                <div class="progress-time">{% if order.shipped_at %}{{ order.shipped_at|date:"m-d H:i" }}{% else %}-{% endif %}</div>
+              </div>
+              <div class="col progress-step {% if order.status == '已完成' %}active{% endif %}">
+                <div class="progress-marker">4</div>
+                <div class="progress-text mt-2">交易完成</div>
+                <div class="progress-time">{% if order.completed_at %}{{ order.completed_at|date:"m-d H:i" }}{% else %}-{% endif %}</div>
+              </div>
+            </div>
+            <div class="progress mt-2" style="height: 5px;">
+              {% if order.status == '待支付' %}
+                <div class="progress-bar" role="progressbar" style="width: 25%"></div>
+              {% elif order.status == '处理中' %}
+                <div class="progress-bar" role="progressbar" style="width: 50%"></div>
+              {% elif order.status == '已发货' %}
+                <div class="progress-bar" role="progressbar" style="width: 75%"></div>
+              {% elif order.status == '已完成' %}
+                <div class="progress-bar" role="progressbar" style="width: 100%"></div>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- 订单商品列表 -->
+          <h5 class="mb-3">订单商品</h5>
+          {% if order.items.all %}
+            <div class="table-responsive mb-4">
+              <table class="table align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" class="ps-4">商品信息</th>
+                    <th scope="col" class="text-center">单价</th>
+                    <th scope="col" class="text-center">数量</th>
+                    <th scope="col" class="text-end pe-4">小计</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in order.items.all %}
+                  <tr>
+                    <td class="ps-4">
+                      <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                          {% if item.product.image_url %}
+                            <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="rounded" width="60">
+                          {% else %}
+                            <div class="bg-light rounded" style="width: 60px; height: 60px;"></div>
+                          {% endif %}
+                        </div>
+                        <div class="ms-3">
+                          <h6 class="mb-1">{{ item.product.name }}</h6>
+                          {% if item.variant %}
+                            <small class="text-muted">规格: {{ item.variant }}</small>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </td>
+                    <td class="text-center">￥{{ item.price }}</td>
+                    <td class="text-center">{{ item.quantity }}</td>
+                    <td class="text-end pe-4 fw-bold">￥{{ item.subtotal }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="text-muted">没有订单项信息。</p>
+          {% endif %}
+
+          <!-- 订单信息与金额计算 -->
+          <div class="row">
+            <div class="col-md-7 mb-4 mb-md-0">
+              <div class="card h-100 border">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">配送信息</h5>
+                  <div class="mb-3">
+                    <p class="mb-1"><strong>收货人:</strong> {{ order.shipping_name }}</p>
+                    <p class="mb-1"><strong>联系电话:</strong> {{ order.shipping_phone }}</p>
+                    <p class="mb-0"><strong>收货地址:</strong> {{ order.shipping_address }}</p>
+                  </div>
+
+                  {% if order.shipping_tracking_number %}
+                  <h5 class="card-title mb-3 mt-4">物流信息</h5>
+                  <p class="mb-1"><strong>物流公司:</strong> {{ order.shipping_carrier }}</p>
+                  <p class="mb-1"><strong>运单号码:</strong> {{ order.shipping_tracking_number }}</p>
+                  <a href="#" class="btn btn-sm btn-outline-primary mt-2">查看物流详情</a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="card border">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">订单金额</h5>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>商品总额</span>
+                    <span>{{ order.total_amount }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>运费</span>
+                    <span>￥{{ order.shipping_fee|default:"0.00" }}</span>
+                  </div>
+                  {% if order.discount %}
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>优惠金额</span>
+                    <span class="text-danger">-￥{{ order.discount }}</span>
+                  </div>
+                  {% endif %}
+                  <hr>
+                  <div class="d-flex justify-content-between fw-bold">
+                    <span>实付金额</span>
+                    <span class="fs-5 text-primary">￥{{ order.total_amount }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer bg-white py-3 border-top d-flex justify-content-between">
+          <a href="{% url 'orders' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> 返回订单列表
+          </a>
+          <div>
+            {% if order.status == '待支付' %}
+            <a href="{% url 'checkout' %}?order_id={{ order.id }}" class="btn btn-primary ms-2">
+              <i class="bi bi-credit-card"></i> 去支付
+            </a>
+            {% elif order.status == '已发货' %}
+            <button class="btn btn-success">
+              <i class="bi bi-check-circle"></i> 确认收货
+            </button>
+            {% elif order.status == '已完成' %}
+            <a href="{% url 'review' %}?order_id={{ order.id }}" class="btn btn-outline-primary ms-2">
+              <i class="bi bi-star"></i> 评价商品
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.progress-step {
+  text-align: center;
+  position: relative;
+}
+
+.progress-marker {
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  color: #6c757d;
+  font-weight: bold;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  position: relative;
+}
+
+.progress-step.active .progress-marker {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.progress-time {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
+}
+
+.progress-step.active .progress-text {
+  font-weight: bold;
+  color: #0d6efd;
+}
+</style>
+{% endblock %}

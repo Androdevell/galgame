@@ -93,7 +93,8 @@ class Profile(models.Model):
     # 可以在这里添加额外的字段，例如电话号码、地址等
     phone = models.CharField(max_length=20, blank=True)
     address = models.TextField(blank=True)
-
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # 用户余额
+    payment_password = models.CharField(max_length=6, blank=True)  # 注意：实际项目中建议加密存储
     def __str__(self):
         return f"{self.user.username} 的个人资料"
 

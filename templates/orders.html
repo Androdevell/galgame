@@ -1,34 +1,129 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
-<div class="container my-4">
-    <h2>我的订单</h2>
-    {% if orders %}
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>订单号</th>
-                    <th>下单时间</th>
-                    <th>状态</th>
-                    <th>总金额</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in orders %}
-                <tr>
-                    <td>{{ order.order_number }}</td>
-                    <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
-                    <td>{{ order.status }}</td>
-                    <td>￥{{ order.total_amount }}</td>
-                    <td>
-                        <a href="{% url 'order_detail' order.id %}" class="btn btn-primary btn-sm">查看详情</a>
+<div class="container my-5">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">我的订单</h2>
+        <a href="{% url 'index' %}" class="btn btn-outline-primary">
+          <i class="bi bi-bag-plus"></i> 继续购物
+        </a>
+      </div>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {% if orders %}
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="px-4 py-3">订单号</th>
+                    <th class="py-3">下单时间</th>
+                    <th class="py-3">状态</th>
+                    <th class="py-3">总金额</th>
+                    <th class="py-3 text-end pe-4">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for order in orders %}
+                  <tr>
+                    <td class="px-4 py-3">
+                      <span class="fw-medium">{{ order.order_number }}</span>
                     </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>您还没有订单。</p>
-    {% endif %}
+                    <td class="py-3">{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                    <td class="py-3">
+                      {% if order.status == '已完成' %}
+                        <span class="badge bg-success rounded-pill px-3">{{ order.status }}</span>
+                      {% elif order.status == '待支付' %}
+                        <span class="badge bg-warning text-dark rounded-pill px-3">{{ order.status }}</span>
+                      {% elif order.status == '已取消' %}
+                        <span class="badge bg-danger rounded-pill px-3">{{ order.status }}</span>
+                      {% elif order.status == '处理中' %}
+                        <span class="badge bg-info rounded-pill px-3">{{ order.status }}</span>
+                      {% elif order.status == '已发货' %}
+                        <span class="badge bg-primary rounded-pill px-3">{{ order.status }}</span>
+                      {% else %}
+                        <span class="badge bg-secondary rounded-pill px-3">{{ order.status }}</span>
+                      {% endif %}
+                    </td>
+                    <td class="py-3 fw-bold">￥{{ order.total_amount }}</td>
+                    <td class="py-3 text-end pe-4">
+                      <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-eye"></i> 查看详情
+                      </a>
+                      {% if order.status == '待支付' %}
+                      <a href="{% url 'checkout' %}?order_id={{ order.id }}" class="btn btn-sm btn-primary ms-2">
+                        <i class="bi bi-credit-card"></i> 去支付
+                      </a>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {% if orders.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+          <ul class="pagination justify-content-center">
+            {% if orders.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ orders.previous_page_number }}" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">&laquo;</span>
+              </li>
+            {% endif %}
+            
+            {% for i in orders.paginator.page_range %}
+              {% if orders.number == i %}
+                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+              {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+              {% endif %}
+            {% endfor %}
+            
+            {% if orders.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ orders.next_page_number }}" aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">&raquo;</span>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+
+      {% else %}
+        <div class="text-center py-5 my-5">
+          <img src="{% static 'images/empty-orders.svg' %}" alt="没有订单" style="width: 120px; opacity: 0.6;" class="mb-4">
+          <h4 class="text-secondary mb-3">您还没有订单</h4>
+          <p class="text-muted mb-4">浏览商品并下单，您的订单将显示在这里</p>
+          <a href="{% url 'shop' %}" class="btn btn-primary rounded-pill px-4 py-2">
+            <i class="bi bi-bag-plus me-2"></i> 去购物
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}

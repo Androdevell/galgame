@@ -120,7 +120,8 @@
                         {% if user.is_authenticated %}
                             <button class="btn btn-link text-white dropdown-toggle"
                                     data-bs-toggle="dropdown">
-                                👤 {{ user.username }}
+                            <i class="fas fa-user"></i>
+                                 {{ user.username }}
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="{% url 'orders' %}">我的订单</a></li>
